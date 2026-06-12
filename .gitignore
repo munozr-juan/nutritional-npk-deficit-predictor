@@ -1,0 +1,50 @@
+# =========================================================================
+# Python & Data Science
+# =========================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+.env
+
+# Ignorar CSVs en general, PERO forzar la inclusión del dataset de la tesis
+*.csv
+!dataset_lechugas.csv
+
+# Proteger de binarios pesados genéricos, PERO incluir los oficiales de producción
+*.pkl
+*.joblib
+!ml_pipeline/models/model.joblib
+!ml_pipeline/models/scaler.joblib
+
+# =========================================================================
+# Embedded Firmware (PlatformIO / ESP32)
+# =========================================================================
+.pio/
+.pioenvs/
+.piolibdeps/
+build/
+*.bin
+*.elf
+
+# =========================================================================
+# AWS Cryptography & Credentials (CRITICAL SECURITY)
+# =========================================================================
+# Bloquea explícitamente las extensiones de tus certificados de AWS
+*.pem
+*.key
+*.crt
+aws_credentials.json
+**/certs/
+.streamlit/secrets.toml
+
+# =========================================================================
+# IDEs & OS Specific (Windows / VS Code / Obsidian)
+# =========================================================================
+.vscode/
+.idea/
+.obsidian/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
