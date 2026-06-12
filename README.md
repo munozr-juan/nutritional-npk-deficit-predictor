@@ -8,7 +8,7 @@ This repository contains the hardware architecture, firmware, and machine learni
 
 The platform is organized into two asynchronously coupled subsystems: the acquisition and instrumentation layer (IoT) and the analytical predictive layer (Modeling).
 
-![System Data Flow Diagram](docs/images/arch_flow.jpg)
+![System Data Flow Diagram](docs/img/arch_flow.JPG)
 
 ### Data Flow Overview:
 1. **IoT Layer:** The central microcontroller (ESP32) manages the synchronous acquisition of macro-environmental substrate variables via an industrial NPK probe connected over a differential bus, alongside foliar spectral signatures captured via a spectrometric sensor.
@@ -23,7 +23,7 @@ The power and instrumentation stages are engineered to isolate switching noise f
 
 > **[Placeholder]** The detailed electrical schematic in CAD/KiCad format is currently undergoing final export validation and will be positioned below.
 > 
-> ![System Electrical Schematic](docs/images/hardware_schematic.png)
+> ![System Electrical Schematic](docs/img/hardware_schematic.png)
 
 ### Interface Specifications:
 * **Central Processing Unit:** ESP32 DevKitC utilizing integrated SRAM for intermediate telemetry frame buffering.
@@ -40,12 +40,12 @@ The experimental setup transitioned from a breadboard-mounted prototype for cont
 ### Electronic Prototyping and Bench Testing
 During this phase, a Mean Well S-100-12 switching power supply (12V, 8.5A) was implemented to drive the industrial NPK probe. A regulated 5V rail was derived to power the ESP32 logic bus and the MAX485 transceiver.
 
-![Breadboard Implementation](docs/images/hw_implementation.jpg)
+![Breadboard Implementation](docs/img/hw_implementation.JPEG)
 
 ### Instrumentation in Controlled Crop Environment
 To eliminate physical bias caused by external ambient light radiation (which introduces optical noise into the photodiode arrays), a custom sealed optical isolation chamber was engineered and fitted over the AS7262 sensor. This structural enclosure ensures that the captured spectral signatures reflect only the light wavelengths induced by the sensor's own onboard excitation LED interacting with the foliar morphology.
 
-![Physical Implementation in Crop](docs/images/physical_implementation.jpg)
+![Physical Implementation in Crop](docs/img/physical_implementation.JPEG)
 
 ---
 
