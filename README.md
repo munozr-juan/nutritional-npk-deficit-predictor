@@ -8,7 +8,7 @@ This repository contains the hardware architecture, firmware, and machine learni
 
 The platform is organized into two asynchronously coupled subsystems: the acquisition and instrumentation layer (IoT) and the analytical predictive layer (Modeling).
 
-![System Data Flow Diagram](docs/img/arch_flow.JPG)
+![System Data Flow Diagram](docs/img/arch_flow.jpg)
 
 ### Data Flow Overview:
 1. **IoT Layer:** The central microcontroller (ESP32) manages the synchronous acquisition of macro-environmental substrate variables via an industrial NPK probe connected over a differential bus, alongside foliar spectral signatures captured via a spectrometric sensor.
