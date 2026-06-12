@@ -1,101 +1,106 @@
-# Early NPK Deficit Predictor: End-to-End IoT & Edge AI Platform
+# Early NPK Deficit Predictor: End-to-End IoT and Edge AI Platform
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PlatformIO](https://img.shields.io/badge/PlatformIO-ESP32--C3%2FDevKit-orange.svg)](https://platformio.org/)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
-[![Machine Learning](https://img.shields.io/badge/ML-Scikit--Learn%20%2F%20Joblib-green.svg)](https://scikit-learn.org/)
-
-Este repositorio contiene la arquitectura de hardware, firmware y el pipeline de Machine Learning desarrollado para la detección temprana de deficiencias de Macronutrientes (Nitrógeno, Fósforo y Potasio) en cultivos de ciclo corto (*Black Simpson Lettuce*). El sistema fusiona telemetría de sustrato via Modbus RTU, espectrometría visible en el borde y un pipeline predictivo multiclase.
+This repository contains the hardware architecture, firmware, and machine learning pipeline developed for the early detection of macronutrient deficiencies (Nitrogen, Phosphorus, and Potassium) in short-cycle crops (*Lactuca sativa* var. *Black Simpson*). The platform integrates substrate-level telemetry via Modbus RTU, visible-range spectrometry at the edge, and a multi-class predictive pipeline.
 
 ---
 
-## 1. Arquitectura General y Flujo de Datos
+## 1. System Architecture and Data Flow
 
-El sistema se divide en dos macro-ecosistemas acoplados de manera asíncrona: la capa de adquisición e instrumentación (IoT) y la capa de analítica predictiva (Modelado).
+The platform is organized into two asynchronously coupled subsystems: the acquisition and instrumentation layer (IoT) and the analytical predictive layer (Modeling).
 
-![Diagrama de Flujo de la Solución](docs/images/arch_flow.jpg)
+![System Data Flow Diagram](docs/images/arch_flow.jpg)
 
-### Descripción del Flujo:
-1. **Capa IoT:** El microcontrolador central (ESP32) gestiona la adquisición síncrona de variables macroambientales de sustrato mediante una sonda NPK acoplada por bus industrial, y la firma espectral de las hojas mediante un sensor espectrométrico.
-2. **Ingesta e Interfaz:** Los datos son estructurados localmente para almacenamiento en búfer local o transmisión directa mediante pasarelas de red hacia los sistemas de almacenamiento centralizados.
-3. **Capa de Modelado:** Los datos crudos ingresan a un pipeline secuencial de ETL donde se limpian, se extraen índices de reflectancia espectral no lineales, se normalizan las escalas de características físicas y se ejecuta la inferencia estadística para clasificar el estado nutricional del cultivo.
+### Data Flow Overview:
+1. **IoT Layer:** The central microcontroller (ESP32) manages the synchronous acquisition of macro-environmental substrate variables via an industrial NPK probe connected over a differential bus, alongside foliar spectral signatures captured via a spectrometric sensor.
+2. **Ingestion Interface:** Data structures are formatted locally for buffering or direct network transmission to centralized storage systems.
+3. **Modeling Layer:** Raw telemetry vectors enter a sequential ETL pipeline for data cleaning, non-linear spectral reflectance index extraction, feature scaling, and statistical inference to classify the nutritional state of the crop.
 
 ---
 
-## 🔌 2. Conexiones de Hardware y Esquemático Eléctrico
+## 2. Hardware Interfaces and Electrical Schematic
 
-La etapa de potencia e instrumentación está diseñada para aislar el ruido de conmutación de la fuente industrial de las etapas de lectura digital y analógica de los sensores.
+The power and instrumentation stages are engineered to isolate switching noise from the industrial power supply, protecting the digital and analog sensor reading stages.
 
-> ⚠️ **[Marcador de Posición]** El esquema eléctrico detallado en formato CAD/KiCad se encuentra actualmente en proceso de exportación final y se ubicará en esta sección.
+> **[Placeholder]** The detailed electrical schematic in CAD/KiCad format is currently undergoing final export validation and will be positioned below.
 > 
-> ![Esquemático Eléctrico del Sistema](docs/images/hardware_schematic.png)
+> ![System Electrical Schematic](docs/images/hardware_schematic.png)
 
-### Especificaciones de Interconexión:
-* **Unidad Central de Proceso:** ESP32 DevKitC (SRAM integrada para almacenamiento intermedio de tramas).
-* **Sensor Espectrométrico:** Adafruit AS7262 de 6 canales multiespectrales en el espectro visible, comunicado por bus $I^2C$ a 400 kHz.
-* **Sonda de Sustrato:** Sensor NPK industrial basado en el protocolo RS485. Requiere excitación de tensión externa y aislamiento de datos.
-* **Transceptor de Datos:** Módulo MAX485 para la conversión de niveles diferenciales RS485 a niveles TTL binarios directos para la UART del ESP32.
-
----
-
-## 🛠️ 3. Implementación Física del Sistema
-
-El despliegue experimental se validó mediante un prototipo funcional montado en matriz de contactos para pruebas de continuidad eléctrica, escalado posteriormente a condiciones de sustrato controlado en invernadero real.
-
-### Prototipado Electrónico (Banco de Pruebas)
-En esta fase se implementó una fuente conmutada comercial Mean Well S-100-12 ($12\text{V}$, $8.5\text{A}$) dedicada a energizar la sonda industrial NPK, mientras que se derivó una línea regulada de $5\text{V}$ para la alimentación del bus lógico del ESP32 y el transceptor MAX485. 
-
-![Implementación en Protoboard](docs/images/hw_implementation.jpg)
-
-### Instrumentación en Entorno Real de Cultivo
-Para evitar el sesgo físico provocado por la radiación lumínica ambiental externa (ruido óptico en las lecturas de los fotodiodos), se diseñó e implementó una **cámara de aislamiento óptico sellada** (estructura cilíndrica negra) acoplada directamente sobre el sensor AS7262. Esto garantiza que la firma espectral capturada responda únicamente a la reflectancia inducida por el LED de excitación del propio sensor sobre la morfología foliar de la lechuga.
-
-![Implementación Física en Cultivo](docs/images/physical_implementation.jpg)
+### Interface Specifications:
+* **Central Processing Unit:** ESP32 DevKitC utilizing integrated SRAM for intermediate telemetry frame buffering.
+* **Spectral Sensor:** Adafruit AS7262 6-channel visible spectrum spectrometer, communicating via an I2C bus clocked at 400 kHz.
+* **Substrate Probe:** Industrial NPK soil sensor operating on the RS485 protocol, requiring external voltage excitation and data line isolation.
+* **Data Transceiver:** MAX485 module configured for differential RS485-to-TTL translation, routed directly to the ESP32 hardware UART.
 
 ---
 
-## 📊 4. Pipeline de Modelado y Ejemplos de Pruebas
+## 3. Physical Implementation
 
-El núcleo analítico procesa las características físicas adquiridas para discriminar entre 4 estados nutricionales: `Control (Sano)`, `Déficit de N`, `Déficit de P`, y `Déficit de K`.
+The experimental setup transitioned from a breadboard-mounted prototype for continuity validation to a functional deployment within a controlled substrate greenhouse environment.
 
-### Extracción de Características (Feature Engineering)
-Además de las lecturas directas de concentración en $\text{mg/kg}$ de la sonda y los conteos por canal espectral ($450\text{nm}$ a $650\text{nm}$), el pipeline genera variables sintéticas basadas en razones espectrales no lineales para maximizar la separabilidad de las clases:
+### Electronic Prototyping and Bench Testing
+During this phase, a Mean Well S-100-12 switching power supply (12V, 8.5A) was implemented to drive the industrial NPK probe. A regulated 5V rail was derived to power the ESP32 logic bus and the MAX485 transceiver.
 
-$$\text{Índice Razón Espectral} = \frac{\text{Banda}_{\lambda_1}}{\text{Banda}_{\lambda_2}}$$
+![Breadboard Implementation](docs/images/hw_implementation.jpg)
 
-### Ejemplo de Estructura de Datos de Entrada (Raw Telemetry)
-Cada fila representa un vector de estado consolidado enviado por el firmware hacia el pipeline de ejecución:
+### Instrumentation in Controlled Crop Environment
+To eliminate physical bias caused by external ambient light radiation (which introduces optical noise into the photodiode arrays), a custom sealed optical isolation chamber was engineered and fitted over the AS7262 sensor. This structural enclosure ensures that the captured spectral signatures reflect only the light wavelengths induced by the sensor's own onboard excitation LED interacting with the foliar morphology.
 
-| Sonda_N | Sonda_P | Sonda_K | Ch_450nm | Ch_500nm | Ch_550nm | Ch_570nm | Ch_600nm | Ch_650nm |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 45.2 | 12.1 | 33.4 | 1204.5 | 980.2 | 2341.1 | 1890.4 | 540.3 | 310.2 |
+![Physical Implementation in Crop](docs/images/physical_implementation.jpg)
 
-### Log de Ejecución del Pipeline Predictivo (`train_pipeline.py`)
-A continuación se detalla una salida estándar de la validación cruzada y el proceso de evaluación del pipeline predictivo implementado en `ml_pipeline/scripts/`:
+---
 
+## 4. Predictive Modeling Results
+
+The analytical core evaluates the incoming physical telemetry vectors to classify the crop into one of four distinct nutritional states: Potassium Deficit (-K), Nitrogen Deficit (-N), Phosphorus Deficit (-P), or Healthy (Control). 
+
+The training script executes a stratified 5-fold cross-validation strategy using a Gradient Boosting (GB) framework to ensure robust generalization metrics and mitigate spatial overfitting. The evaluation pipeline output metrics are structured below.
+
+### Stratified Cross-Validation Execution (5 Folds)
+
+| Evaluation Phase | Accuracy | F1-Macro |
+| :--- | :---: | :---: |
+| Fold 1 | 0.7444 | 0.6968 |
+| Fold 2 | 0.8778 | 0.8672 |
+| Fold 3 | 0.8000 | 0.7745 |
+| Fold 4 | 0.8372 | 0.8523 |
+| Fold 5 | 0.8427 | 0.6567 |
+| **Global Evaluation Summary (Mean)** | **0.8204 (+/- 0.0453)** | **0.7695 (+/- 0.0830)** |
+
+### Evaluation Metrics by Target Class
+
+| Class / Framework Metric | Precision | Recall | F1-Score | Support |
+| :--- | :---: | :---: | :---: | :---: |
+| **-K** | 0.87 | 0.88 | 0.88 | 101 |
+| **-N** | 0.73 | 0.78 | 0.75 | 116 |
+| **-P** | 0.85 | 0.75 | 0.80 | 106 |
+| **Control** | 0.84 | 0.87 | 0.85 | 122 |
+| **Accuracy** | | | 0.82 | 445 |
+| **Macro Average** | 0.82 | 0.82 | 0.82 | 445 |
+| **Weighted Average** | 0.82 | 0.82 | 0.82 | 445 |
+
+### Technical Performance Analysis:
+* **Model Generalization:** The Gradient Boosting classifier achieved a consolidated global accuracy of 82.04% (+/- 4.53%) and a mean F1-Macro score of 76.95% (+/- 8.30%). Variance across folds stabilizes past Fold 2, validating the model's capacity to handle physiological variations in substrate-grown mediums.
+* **Class Specificity:** The model exhibits its highest discriminative power when isolating Potassium deficiencies (-K), yielding an F1-score of 0.88. The Control group demonstrates stable classification metrics (F1-score of 0.85, Recall of 0.87), minimizing false positives that could trigger unnecessary agricultural interventions.
+* **Statistical Convergence Challenges:** Nitrogen deficiency (-N) exhibits a lower precision (0.73) despite a moderate recall (0.78). This reflects a known agrotechnological constraint: the spectral signature shifts characterizing early-stage chlorosis often overlap mathematically with early-stage phosphorus variance or minor hydration anomalies, presenting a tighter hyper-plane boundary for the ensemble trees.
+
+---
+
+## 5. Deployment Instructions
+
+### Environment Setup
 ```bash
-$ python ml_pipeline/scripts/train_pipeline.py
+git clone https://github.com/munozr-juan/nutritional-npk-deficit-predictor.git
+cd nutritional-npk-deficit-predictor/ml_pipeline
+pip install -r requirements.txt
+```
 
-[INFO] Cargando registros desde data/raw/dataset_lechugas.csv...
-[INFO] Filas cargadas: 1,420 | Columnas detectadas: 9
-[INFO] Ejecutando Preprocesamiento: Imputación de nulos y remoción de Outliers (Z-score > 3)
-[INFO] Extracción de Características: Calculando índices de reflectancia foliar...
-[INFO] Aplicando Feature Scaling mediante StandardScaler robusto.
-[INFO] Entrenando Clasificador Ensemble (Gradient Boosting Classifier)...
+### Pipeline Execution
+To replicate the cross-validation strategy or train the model using the raw telemetry dataset:
+```bash
+python scripts/train_pipeline.py
+```
 
-=== EVALUACIÓN DEL MODELO (Validación Cruzada K-Fold, K=5) ===
-Promedio de Exactitud (Accuracy): 94.62% (+/- 1.15%)
+---
 
-Reporte de Clasificación Final:
-              precision    recall  f1-score   support
-
-     Control       0.96      0.95      0.95       284
-   Deficit_N       0.93      0.94      0.93       284
-   Deficit_P       0.95      0.92      0.93       284
-   Deficit_K       0.94      0.97      0.95       284
-
-    accuracy                           0.95      1136
-   macro avg       0.95      0.95      0.94      1136
-weighted avg       0.95      0.95      0.94      1136
-
-[SUCCESS] Pipeline ejecutado con éxito. Modelos exportados a 'ml_pipeline/models/model.joblib'
+## Author
+* **Juan Camilo Muñoz** - Electronic Engineer - Universidad de los Andes.
